@@ -1,14 +1,12 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
-from chatbot import google_dialog
+from django.http import JsonResponse
+from chatbot import googleDialog
+from chatbot.chatDataObjectMap import ChatDataObjectMap
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
-import logging
-import json
-import requests
+import logging, json, requests
 
 logger = logging.getLogger("django")
-logger.setLevel(logging.INFO)
 
 def index(request):
     logger.debug("vue index")
@@ -16,9 +14,9 @@ def index(request):
 
 def message(request):
     message  = request.POST['message']    
-    result = google_dialog.detect_intent_texts([message]) 
+    result = googleDialog.detectIntentTexts([message])
+    ChatDataObjectMap.insertData(result)
     return JsonResponse(result)
-    #return JsonResponse(result)
 
 @csrf_exempt
 def test(request):
