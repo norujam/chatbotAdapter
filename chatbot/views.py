@@ -1,10 +1,9 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from chatbot import googleDialog
-from chatbot.chatDataObjectMap import ChatDataObjectMap
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
-import logging, json, requests
+import logging, json, requests, asyncio
 
 logger = logging.getLogger("django")
 
@@ -13,9 +12,14 @@ def index(request):
     return render(request, 'chatbot/index.html')
 
 def message(request):
-    message  = request.POST['message']    
-    result = googleDialog.detectIntentTexts([message])
-    ChatDataObjectMap.insertData(result)
+    message = request.POST['message']
+    try:
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        loop = asyncio.get_event_loop()
+        task = asyncio.ensure_future(googleDialog.detectIntentTexts([message]))
+        result = loop.run_until_complete(task)
+    finally:
+        loop.close()
     return JsonResponse(result)
 
 @csrf_exempt

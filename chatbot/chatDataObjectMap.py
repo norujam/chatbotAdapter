@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger("django")
 
 class ChatDataObjectMap:
-    def insertData(param):
+    async def insertData(param):
         try:
             logger.debug(param)
             MongoDb.connect_db()

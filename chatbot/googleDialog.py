@@ -1,3 +1,4 @@
+from chatbot.chatDataObjectMap import ChatDataObjectMap
 import dialogflow, json, logging, configparser
 
 logger = logging.getLogger("django")
@@ -5,7 +6,7 @@ logger = logging.getLogger("django")
 config = configparser.ConfigParser()
 config.read('config.properties')
 
-def detectIntentTexts(texts):
+async def detectIntentTexts(texts):
     """Returns the result of detect intent with texts as inputs.
     Using the same `session_id` between requests allows continuation
     of the conversaion."""
@@ -45,5 +46,7 @@ def detectIntentTexts(texts):
         dictResult[response.query_result.action]={}
         for i in payloadData.keys():
             dictResult[response.query_result.action][i] = payloadData[i]
+
+    await ChatDataObjectMap.insertData(dictResult)
 
     return dictResult
