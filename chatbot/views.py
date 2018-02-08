@@ -4,18 +4,26 @@ from chatbot import googleDialog
 from chatbot.chatDataObjectMap import ChatDataObjectMap
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
-import logging, json, requests
+import logging, json, requests, configparser
 
 logger = logging.getLogger("django")
 
+config = configparser.ConfigParser()
+config.read('config.properties')
+
 def index(request):
     logger.debug("vue index")
-    return render(request, 'chatbot/index.html')
+    return render(request, 'chatbot/index.html', )
 
 def message(request):
-    message  = request.POST['message']    
-    result = googleDialog.detectIntentTexts([message])
-    ChatDataObjectMap.insertData(result)
+    message  = request.POST['message']
+    if(config['setSite']['dialogLoc']=="outer"):
+        url = config['setSite']['dialogUrl']
+        payload = {"message":message}
+        result = json.loads(requests.post(url, data=payload).text)
+    else:
+        result = googleDialog.detectIntentTexts([message])
+        ChatDataObjectMap.insertData(result)
     return JsonResponse(result)
 
 @csrf_exempt
