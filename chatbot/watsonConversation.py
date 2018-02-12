@@ -24,11 +24,23 @@ def detectIntentTexts(texts):
             'text':texts[0]
         }
     )
-    logger.debug(response)
 
     dictResult={}
     dictResult["text"] = texts
-    dictResult["action"] = "watson_test"
-    dictResult["main_message"] = response['output']['text']
+    try:
+        action = response['intents'][0]['intent'].split("-")[0]
+    except IndexError:
+        action = "input.unknown"
+    dictResult["action"] = action
+    dictResult["main_message"] = response['output']['text'][0]
+    if action in ['outer_retrieve']:
+        dictResult["parameters"]=[]
+        for entities in response['entities']:
+            dictResult["parameters"].append(entities['value'])
+
+    if action in ['outer_retrieve']:
+        dictResult[action]={}
+        for entities in response['entities']:
+            dictResult[action][entities['entity']] = entities['value']
 
     return dictResult
