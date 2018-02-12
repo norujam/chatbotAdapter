@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from chatbot import googleDialog
 from chatbot.chatDataObjectMap import ChatDataObjectMap
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -16,13 +15,14 @@ def index(request):
     return render(request, 'chatbot/index.html', )
 
 def message(request):
-    message  = request.POST['message']
+    message = request.POST['message']
     if(config['setSite']['dialogLoc']=="outer"):
         url = config['setSite']['dialogUrl']
         payload = {"message":message}
         result = json.loads(requests.post(url, data=payload).text)
     else:
-        result = googleDialog.detectIntentTexts([message])
+        apiCallmodule = __import__(config['setSite']['apiCallModule'], fromlist=["detectIntentTexts"])
+        result = apiCallmodule.detectIntentTexts([message])
         ChatDataObjectMap.insertData(result)
     return JsonResponse(result)
 
