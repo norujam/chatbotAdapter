@@ -22,27 +22,27 @@ def detectIntentTexts(texts):
 
     response = session_client.detect_intent(session=session, query_input=query_input)
 
-    dictResult={}
-    dictResult["text"] = texts
-    dictResult["action"] = response.query_result.action
-    #logger.debug(response.query_result)
-    dictResult["main_message"] = response.query_result.fulfillment_messages[0].text.text[0]
+    dict_result = dict
+    dict_result["text"] = texts
+    dict_result["action"] = response.query_result.action
+    # logger.debug(response.query_result)
+    dict_result["main_message"] = response.query_result.fulfillment_messages[0].text.text[0]
     if response.query_result.action in ['outer_retrieve', 'outer_response']:
-        dictResult["parameters"]=[]
+        dict_result["parameters"]=[]
         parameters = response.query_result.parameters
         for i in parameters.keys():
-            dictResult["parameters"].append(parameters[i])
+            dict_result["parameters"].append(parameters[i])
 
     if response.query_result.action in ['outer_retrieve']:
         parameters = response.query_result.parameters
-        dictResult[response.query_result.action]={}
+        dict_result[response.query_result.action]={}
         for i in parameters.keys():
-            dictResult[response.query_result.action][i] = parameters[i]
+            dict_result[response.query_result.action][i] = parameters[i]
 
     if response.query_result.action in ['outer_response']:
         payloadData = response.query_result.webhook_payload
-        dictResult[response.query_result.action]={}
+        dict_result[response.query_result.action]={}
         for i in payloadData.keys():
-            dictResult[response.query_result.action][i] = payloadData[i]
+            dict_result[response.query_result.action][i] = payloadData[i]
 
-    return dictResult
+    return dict_result

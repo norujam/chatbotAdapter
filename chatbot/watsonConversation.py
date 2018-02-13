@@ -6,41 +6,42 @@ logger = logging.getLogger("django")
 config = configparser.ConfigParser()
 config.read('config.properties')
 
-def detectIntentTexts(texts):
-    apiUsername=config['watsonApi']['apiUsername']
-    apiPassword=config['watsonApi']['apiPassword']
-    version=config['watsonApi']['version']
-    workspaceId=config['watsonApi']['workspaceId']
+
+def detect_intent_texts(texts):
+    api_user_name = config['watsonApi']['apiUsername']
+    api_password = config['watsonApi']['apiPassword']
+    version = config['watsonApi']['version']
+    workspace_id = config['watsonApi']['workspaceId']
 
     conversation = ConversationV1(
-        username=apiUsername,
-        password=apiPassword,
+        username=api_user_name,
+        password=api_password,
         version=version
     )
 
     response = conversation.message(
-        workspace_id=workspaceId,
+        workspace_id=workspace_id,
         input={
-            'text':texts[0]
+            'text': texts[0]
         }
     )
 
-    dictResult={}
-    dictResult["text"] = texts
+    dict_result = dict()
+    dict_result["text"] = texts
     try:
         action = response['intents'][0]['intent'].split("-")[0]
     except IndexError:
         action = "input.unknown"
-    dictResult["action"] = action
-    dictResult["main_message"] = response['output']['text'][0]
+    dict_result["action"] = action
+    dict_result["main_message"] = response['output']['text'][0]
     if action in ['outer_retrieve']:
-        dictResult["parameters"]=[]
+        dict_result["parameters"]=[]
         for entities in response['entities']:
-            dictResult["parameters"].append(entities['value'])
+            dict_result["parameters"].append(entities['value'])
 
     if action in ['outer_retrieve']:
-        dictResult[action]={}
+        dict_result[action] = {}
         for entities in response['entities']:
-            dictResult[action][entities['entity']] = entities['value']
+            dict_result[action][entities['entity']] = entities['value']
 
-    return dictResult
+    return dict_result

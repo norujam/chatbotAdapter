@@ -18,5 +18,8 @@ class MongoDb:
         )
 
     def close_db():
-        global db
-        db.close
+        try:
+            global db
+            db.close
+        except NameError:
+            pass
