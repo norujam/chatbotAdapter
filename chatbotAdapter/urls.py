@@ -22,4 +22,5 @@ urlpatterns = [
     path('chatbot/', include('chatbot.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('polls/', include('polls.urls')),
+    path('service/', include('service.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
