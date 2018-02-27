@@ -5,6 +5,5 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('message/', views.message, name='message'),
-    path('test/', views.test, name='test'),
-    path('adapter/', views.adapter, name='adapter'),
+    path('web_hook/', views.web_hook, name='web_hook'),
 ]

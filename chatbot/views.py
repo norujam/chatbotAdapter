@@ -35,15 +35,11 @@ def message(request):
 
 
 @csrf_exempt
-def test(request):
-    logger.debug(request.POST['country'])
-    return JsonResponse({'data': {"country": '1, 2, 3'}})
-
-
-@csrf_exempt
 @xframe_options_exempt
-def adapter(request):
-    json_data = json.loads(request.body.decode())['result']['parameters']
+def web_hook(request):
+    json_data = json.loads(request.body.decode())
+    action = json_data['result']['action']
+    json_data = json_data['result']['parameters']
     for key in json_data.keys():
         global pKey
         pKey = key
@@ -51,9 +47,9 @@ def adapter(request):
     # url = ""
     # payload = {}
     if pKey == 'country':
-        url = "http://127.0.0.1/chatbot/test/"
-        payload = {"country": "123"}
+        url = config['service']['service_url']+"service_country_list/"
+        payload = {"param": pKey}
     html = requests.post(url, data=payload)
-    logger.debug(html.text)
+    # logger.debug(html.text)
     return JsonResponse(json.loads(html.text))
 

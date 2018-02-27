@@ -27,22 +27,22 @@ def detect_intent_texts(texts):
     dict_result["text"] = texts
     dict_result["action"] = response.query_result.action
     dict_result["main_message"] = response.query_result.fulfillment_messages[0].text.text[0]
-    if response.query_result.action in ['outer_retrieve', 'outer_response']:
+    if any(response.query_result.action in s for s in ['outer_retrieve', 'outer_response']):
         dict_result["parameters"] = []
         parameters = response.query_result.parameters
         for i in parameters.keys():
             dict_result["parameters"].append(parameters[i])
 
-    if response.query_result.action in ['outer_retrieve']:
+    if any(response.query_result.action in s for s in response.query_result.action in ['outer_retrieve']):
         parameters = response.query_result.parameters
-        dict_result[response.query_result.action]={}
+        dict_result[response.query_result.action] = {}
         for i in parameters.keys():
             dict_result[response.query_result.action][i] = parameters[i]
 
-    if response.query_result.action in ['outer_response']:
-        payloadData = response.query_result.webhook_payload
-        dict_result[response.query_result.action]={}
-        for i in payloadData.keys():
-            dict_result[response.query_result.action][i] = payloadData[i]
+    if any(response.query_result.action in s for s in response.query_result.action in ['outer_response']):
+        payload_data = response.query_result.webhook_payload
+        dict_result[response.query_result.action] = {}
+        for i in payload_data.keys():
+            dict_result[response.query_result.action][i] = payload_data[i]
 
     return dict_result
