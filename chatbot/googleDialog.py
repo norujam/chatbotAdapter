@@ -22,7 +22,7 @@ def detect_intent_texts(texts):
     query_input = dialogflow.types.QueryInput(text=text_input)
 
     response = session_client.detect_intent(session=session, query_input=query_input)
-    logger.debug(response.query_result)
+    # logger.debug("call detect="+response.query_result)
     dict_result = dict()
     dict_result["text"] = texts
     dict_result["action"] = response.query_result.action
@@ -33,16 +33,15 @@ def detect_intent_texts(texts):
         for i in parameters.keys():
             dict_result["parameters"].append(parameters[i])
 
-    if any(response.query_result.action in s for s in response.query_result.action in ['outer_retrieve']):
+    if any(response.query_result.action in s for s in ['outer_retrieve']):
         parameters = response.query_result.parameters
         dict_result[response.query_result.action] = {}
         for i in parameters.keys():
             dict_result[response.query_result.action][i] = parameters[i]
 
-    if any(response.query_result.action in s for s in response.query_result.action in ['outer_response']):
+    if any(response.query_result.action in s for s in ['outer_response']):
         payload_data = response.query_result.webhook_payload
-        dict_result[response.query_result.action] = {}
         for i in payload_data.keys():
-            dict_result[response.query_result.action][i] = payload_data[i]
-
+            dict_result[i] = payload_data[i]
+    logger.debug(dict_result)
     return dict_result
