@@ -1,6 +1,7 @@
 from mongoengine import *
 import datetime
 
+
 class ChatLog(Document):
     actionType = StringField(max_length=30, required=True)
     sentence = StringField(max_length=300, required=True)

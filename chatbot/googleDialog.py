@@ -10,9 +10,9 @@ def detect_intent_texts(texts):
     """Returns the result of detect intent with texts as inputs.
     Using the same `session_id` between requests allows continuation
     of the conversaion."""
-    project_id=config['googleApi']['projectId']
-    session_id=config['googleApi']['sessionId']
-    language_code="ko"
+    project_id = config['googleApi']['projectId']
+    session_id = config['googleApi']['sessionId']
+    language_code = "ko"
     session_client = dialogflow.SessionsClient()
 
     session = session_client.session_path(project_id, session_id)
