@@ -29,14 +29,14 @@ function setDialog() {
             data : {'csrfmiddlewaretoken':"{{ csrf_token }}"
 		 ,'message':user_message},
             success : function(data) {
-				alert(data.action)
+				console.log(JSON.stringify(data))
 				document.getElementById("input_user_message").value = "";
 				example2._data.items.push({gubun:'A', message:data.main_message});
 				if(data.action == 'outer_retrieve') {
 					example2._data.items.push({gubun:'A', message:data.outer_retrieve});
 				}
-				if(data.action == 'outer_response') {
-					example2._data.items.push({gubun:'A', message:data.outer_response});
+				if(data.action.toString().indexOf("outer_response") > -1) {
+					example2._data.items.push({gubun:'A', message:data.result});
 				}
 				document.getElementById("input_user_message").focus();
             },
