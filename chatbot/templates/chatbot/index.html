@@ -2,10 +2,14 @@
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 예시<br/>
 어떤 나라에 대한 정보가 있나요?<br>
+유럽에 대한 정보를 알려줘요<br/>
+<br/>
 미국으로 유학갈래요<br/>
-오늘은 몇일이지?<br/><br/>
+<br/>
+오늘은 몇일이지?<br/>
+<br/>
 <div id="example-2">
-  <div v-for="(item, index) in items" style="width:450px;">
+  <div v-for="(item, index) in items" style="width:650px;">
 	<div style="text-align:left" v-if="item.gubun == 'Q'">[[ item.message ]]</div>
 	<div style="text-align:right" v-else>[[ item.message ]]</div>
   </div>
@@ -32,8 +36,8 @@ function setDialog() {
 				console.log(JSON.stringify(data))
 				document.getElementById("input_user_message").value = "";
 				example2._data.items.push({gubun:'A', message:data.main_message});
-				if(data.action == 'outer_retrieve') {
-					example2._data.items.push({gubun:'A', message:data.outer_retrieve});
+				if(data.action.toString().indexOf("outer_retrieve") > -1) {
+					example2._data.items.push({gubun:'A', message:data.result});
 				}
 				if(data.action.toString().indexOf("outer_response") > -1) {
 					example2._data.items.push({gubun:'A', message:data.result});
