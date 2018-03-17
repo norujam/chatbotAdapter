@@ -1,5 +1,5 @@
-from mongoengine import *
 import datetime
+from mongoengine import *
 
 
 class ChatLog(Document):

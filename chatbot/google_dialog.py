@@ -1,17 +1,20 @@
-import dialogflow, json, logging, configparser
+import json
+import logging
+import configparser
+import dialogflow
 
 logger = logging.getLogger("django")
 
-config = configparser.ConfigParser()
-config.read('config.properties')
+CONFIG = configparser.ConfigParser()
+CONFIG.read('config.properties')
 
 
 def detect_intent_texts(texts):
     """Returns the result of detect intent with texts as inputs.
     Using the same `session_id` between requests allows continuation
     of the conversaion."""
-    project_id = config['googleApi']['projectId']
-    session_id = config['googleApi']['sessionId']
+    project_id = CONFIG['googleApi']['projectId']
+    session_id = CONFIG['googleApi']['sessionId']
     language_code = "ko"
     session_client = dialogflow.SessionsClient()
 
@@ -27,21 +30,13 @@ def detect_intent_texts(texts):
     dict_result["text"] = texts
     dict_result["action"] = response.query_result.action
     dict_result["main_message"] = response.query_result.fulfillment_messages[0].text.text[0]
-    if any(response.query_result.action in s for s in ['outer_retrieve', 'outer_response']):
-        dict_result["parameters"] = []
-        parameters = response.query_result.parameters
-        for i in parameters.keys():
-            dict_result["parameters"].append(parameters[i])
 
-    if any(response.query_result.action in s for s in ['outer_retrieve']):
+    if any(response.query_result.action.find(s) > -1
+           for s in ['outer_retrieve', 'outer_response']):
         parameters = response.query_result.parameters
-        dict_result[response.query_result.action] = {}
+        dict_result["parameters"] = {}
         for i in parameters.keys():
-            dict_result[response.query_result.action][i] = parameters[i]
+            dict_result["parameters"][i] = parameters[i]
 
-    if any(response.query_result.action in s for s in ['outer_response']):
-        payload_data = response.query_result.webhook_payload
-        for i in payload_data.keys():
-            dict_result[i] = payload_data[i]
     logger.debug(dict_result)
     return dict_result

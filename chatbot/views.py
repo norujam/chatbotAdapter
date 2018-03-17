@@ -1,55 +1,57 @@
-from django.shortcuts import render
-from django.http import JsonResponse
-from chatbot.chatLogObjectMap import ChatLogObjectMap
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.clickjacking import xframe_options_exempt
-from chatbot import doNotCallApi as DoNotCallApi
 import logging
 import json
 import requests
 import configparser
+from django.shortcuts import render
+from django.http import JsonResponse
+from chatbot.chat_log_object_map import ChatLogObjectMap
+from chatbot import do_not_call_api
 
-logger = logging.getLogger("django")
+LOGGER = logging.getLogger("django")
 
-config = configparser.ConfigParser()
-config.read('config.properties')
+CONFIG = configparser.ConfigParser()
+CONFIG.read('config.properties')
 
 
 def index(request):
-    logger.debug("vue index")
+    LOGGER.debug("vue index")
     return render(request, 'chatbot/index.html')
 
 
 def message(request):
     message_value = request.POST['message']
-    result = DoNotCallApi.check_message(message_value)
-    if result is None and config['setSite']['dialogLoc'] == "outer":
-        url = config['setSite']['dialogUrl']
+    result = do_not_call_api.check_message(message_value)
+    if result is None and CONFIG['setSite']['dialogLoc'] == "outer":
+        url = CONFIG['setSite']['dialogUrl']
         payload = {"message": message_value}
         result = json.loads(requests.post(url, data=payload).text)
     elif result is None:
-        api_call_module = __import__(config['setSite']['apiCallModule'], fromlist=["detect_intent_texts"])
+        api_call_module = __import__(CONFIG['setSite']['apiCallModule'],
+                                     fromlist=["detect_intent_texts"])
         result = api_call_module.detect_intent_texts([message_value])
+        if any(result["action"].find(s) > -1 for s in ['outer_retrieve', 'outer_response']):
+            result["result"] = web_hook(result)
+
         ChatLogObjectMap.insert_log(result)
+
     return JsonResponse(result)
 
 
-@csrf_exempt
-@xframe_options_exempt
-def web_hook(request):
-    json_data = json.loads(request.body.decode())
-    action = json_data['result']['action']
-    json_data = json_data['result']['parameters']
-    for key in json_data.keys():
-        global pKey
-        pKey = key
-        logger.debug(pKey)
-    # url = ""
-    # payload = {}
-    if pKey == 'country':
-        url = config['service']['service_url']+"service_country_list/"
-        payload = {"param": pKey}
-    html = requests.post(url, data=payload)
-    # logger.debug(html.text)
-    return JsonResponse(json.loads(html.text))
+def web_hook(result):
+    try:
+        action = result['action'].split("_")
+        parameters = result['parameters']
+        payload = {}
+        for key in parameters.keys():
+            payload[key] = parameters[key]
+        # url = ""
+        # payload = {}
+
+        url = CONFIG['service']['service_url']+action[2]+"/"
+        html = requests.post(url, data=payload)
+        logging.debug(html)
+    except Exception as err:
+        logging.error(err)
+        raise err
+    return json.loads(html.text)["result"]
 
